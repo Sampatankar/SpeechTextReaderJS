@@ -5,8 +5,7 @@ const readBtn = document.getElementById("read");
 const toggleBtn = document.getElementById("toggle");
 const closeBtn = document.getElementById("close");
 
-const data = [
-  {
+const data = [{
     image: "./img/drink.jpg",
     text: "I'm Thirsty",
   },
@@ -62,17 +61,32 @@ data.forEach(createBox);
 function createBox(item) {
   const box = document.createElement("div");
 
-  const { image, text } = item;
+  const {
+    image,
+    text
+  } = item;
 
   box.classList.add("box");
+
   box.innerHTML = `
     <img src="${image}" alt="${text}" />
     <p class="info">${text}</p>
   `;
 
-  //@todo - speak event:
+  box.addEventListener("click", () => {
+    setTextMessage(text);
+    speakText();
+
+    //Add an active effect:
+    box.classList.add("active");
+    setTimeout(() => box.classList.remove("active"), 800);
+  });
+
   main.appendChild(box);
 }
+
+//Initialise a speech synthesis 'utterance':
+const message = new SpeechSynthesisUtterance();
 
 //An Array to store the voices:
 let voices = [];
@@ -90,17 +104,41 @@ function getVoices() {
   });
 }
 
+//Set the text to be spoken:
+function setTextMessage(text) {
+  message.text = text;
+}
+
+//Speak text:
+function speakText() {
+  speechSynthesis.speak(message);
+}
+
+//Set voice function:
+function setVoice(e) {
+  message.voice = voices.find((voice) => voice.name === e.target.value);
+}
+
 //Voices changed:
 speechSynthesis.addEventListener("voiceschanged", getVoices);
 
 //Toggle Text Box Button:
-toggleBtn.addEventListener("click", () => {
-  document.getElementById("text-box").classList.toggle("show");
-});
+toggleBtn.addEventListener("click", () =>
+  document.getElementById("text-box").classList.toggle("show")
+);
 
 //Close Button:
-closeBtn.addEventListener("click", () => {
-  document.getElementById("text-box").classList.remove("show");
+closeBtn.addEventListener("click", () =>
+  document.getElementById("text-box").classList.remove("show")
+);
+
+//Change voice:
+voicesSelect.addEventListener("change", setVoice);
+
+//Read text button:
+readBtn.addEventListener("click", () => {
+  setTextMessage(textarea.value);
+  speakText();
 });
 
 //Call getvoices:
